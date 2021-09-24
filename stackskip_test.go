@@ -12,6 +12,7 @@ import (
 )
 
 func TestStackSkip(t *testing.T) {
+	skipTimestamp = true
 	var out bytes.Buffer
 
 	logger := logrus.New()
@@ -41,7 +42,7 @@ func TestStackSkip(t *testing.T) {
 		"context": map[string]interface{}{
 			"reportLocation": map[string]interface{}{
 				"filePath":     "github.com/TV4/logrus-stackdriver-formatter/stackskip_test.go",
-				"lineNumber":   29.0,
+				"lineNumber":   30.0,
 				"functionName": "TestStackSkip",
 			},
 		},
