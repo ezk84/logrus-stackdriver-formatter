@@ -136,4 +136,51 @@ var formatterTests = []struct {
 			},
 		},
 	},
+	{
+		run: func(logger *logrus.Logger) {
+			logger.
+				WithField("user", "testuser").
+				Error("my log entry")
+		},
+		out: map[string]interface{}{
+			"severity": "ERROR",
+			"message":  "my log entry",
+			"serviceContext": map[string]interface{}{
+				"service": "test",
+				"version": "0.1",
+			},
+			"context": map[string]interface{}{
+				"user": "testuser",
+				"reportLocation": map[string]interface{}{
+					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
+					"lineNumber":   143.0,
+					"functionName": "glob..func5",
+				},
+			},
+		},
+	},
+	{
+		run: func(logger *logrus.Logger) {
+			logger.
+				WithField("stack_trace", "goroutine 1 [running]:\nmain.main()\n\t/tmp/sandbox3332884018/prog.go:11 +0x45\n").
+				WithError(errors.New("test error")).
+				Error("my log entry")
+		},
+		out: map[string]interface{}{
+			"severity":    "ERROR",
+			"message":     "my log entry: test error",
+			"stack_trace": "my log entry: test error\ngoroutine 1 [running]:\nmain.main()\n\t/tmp/sandbox3332884018/prog.go:11 +0x45\n",
+			"serviceContext": map[string]interface{}{
+				"service": "test",
+				"version": "0.1",
+			},
+			"context": map[string]interface{}{
+				"reportLocation": map[string]interface{}{
+					"filePath":     "github.com/TV4/logrus-stackdriver-formatter/formatter_test.go",
+					"lineNumber":   167.0,
+					"functionName": "glob..func6",
+				},
+			},
+		},
+	},
 }

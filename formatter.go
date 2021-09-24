@@ -46,6 +46,7 @@ type reportLocation struct {
 
 type context struct {
 	Data           map[string]interface{} `json:"data,omitempty"`
+	User           string                 `json:"user,omitempty"`
 	ReportLocation *reportLocation        `json:"reportLocation,omitempty"`
 	HTTPRequest    map[string]interface{} `json:"httpRequest,omitempty"`
 }
@@ -54,6 +55,7 @@ type entry struct {
 	Timestamp      string          `json:"timestamp,omitempty"`
 	ServiceContext *serviceContext `json:"serviceContext,omitempty"`
 	Message        string          `json:"message,omitempty"`
+	Stacktrace     string          `json:"stack_trace,omitempty"`
 	Severity       severity        `json:"severity,omitempty"`
 	Context        *context        `json:"context,omitempty"`
 }
@@ -169,6 +171,22 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 			if req, ok := reqData.(map[string]interface{}); ok {
 				ee.Context.HTTPRequest = req
 				delete(ee.Context.Data, "httpRequest")
+			}
+		}
+
+		// Extract user string if present
+		if userData, ok := ee.Context.Data["user"]; ok {
+			if user, ok := userData.(string); ok {
+				ee.Context.User = user
+				delete(ee.Context.Data, "user")
+			}
+		}
+
+		// Extract stacktrace if present
+		if stackData, ok := ee.Context.Data["stack_trace"]; ok {
+			if stack, ok := stackData.(string); ok {
+				ee.Stacktrace = ee.Message + "\n" + stack
+				delete(ee.Context.Data, "stack_trace")
 			}
 		}
 
