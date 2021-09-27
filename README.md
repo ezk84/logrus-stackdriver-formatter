@@ -29,7 +29,7 @@ var log = logrus.New()
 
 func init() {
     log.Formatter = stackdriver.NewFormatter(
-        stackdriver.WithService("your-service"), 
+        stackdriver.WithService("your-service"),
         stackdriver.WithVersion("v0.1.0"),
     )
     log.Level = logrus.DebugLevel
@@ -58,9 +58,17 @@ Here's a sample entry (prettified) from the example:
 }
 ```
 
-## HTTP request context
+## Adding extra context
 
-If you'd like to add additional context like the `httpRequest`, here's a convenience function for creating a HTTP logger:
+There are a few fields that can be set to provide extra context for errors which are surfaced in the Error Reporting UI to aid in debugging:
+
+| Logrus Field Name  | Expected Go Type         | Format/Schema               |
+|--------------------|--------------------------|-----------------------------|
+| `httpRequest`      | `map[string]interface{}` | [HttpRequestContext][1]     |
+| `user`             | `string`                 | unrestricted                |
+| `stack_trace`      | `string`                 | result of `runtime.Stack()` |
+
+If you'd like to add additional context, for example the `httpRequest`, here's a convenience function for creating a HTTP logger:
 
 ```go
 func httpLogger(logger *logrus.Logger, r *http.Request) *logrus.Entry {
@@ -84,3 +92,19 @@ func handler(w http.ResponseWriter, r *http.Request) {
     httplog.Infof("Logging with HTTP request context")
 }
 ```
+
+Adding stack traces for errors looks like:
+
+```go
+import "runtime/debug"
+
+err := doAThing()
+if (err != nil) {
+    log.
+      WithField("stack_trace", string(debug.Stack())).
+      WithError(err).
+      Error("doing a thing failed")
+}
+```
+
+[1]: https://cloud.google.com/error-reporting/reference/rest/v1beta1/ErrorContext#HttpRequestContext
