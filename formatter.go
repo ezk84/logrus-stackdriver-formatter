@@ -136,7 +136,6 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 	severity := levelsToSeverity[e.Level]
 
 	ee := entry{
-
 		Message:  e.Message,
 		Severity: severity,
 		Context: &context{
@@ -199,6 +198,12 @@ func (f *Formatter) Format(e *logrus.Entry) ([]byte, error) {
 				LineNumber:   int(lineNumber),
 				FunctionName: fmt.Sprintf("%n", c),
 			}
+		}
+	default:
+		// deals with errors being ignored by `encoding/json`
+		// https://github.com/sirupsen/logrus/issues/137
+		if err, ok := ee.Context.Data["error"]; ok {
+			ee.Context.Data["error"] = err.(error).Error()
 		}
 	}
 

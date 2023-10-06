@@ -183,4 +183,21 @@ var formatterTests = []struct {
 			},
 		},
 	},
+	{
+		// when not logging at >= error, WithError should keep the error in the data field
+		run: func(logger *logrus.Logger) {
+			logger.
+				WithError(errors.New("test error")).
+				Warn("my log entry")
+		},
+		out: map[string]interface{}{
+			"severity": "WARNING",
+			"message":  "my log entry",
+			"context": map[string]interface{}{
+				"data": map[string]interface{}{
+					"error": "test error",
+				},
+			},
+		},
+	},
 }
